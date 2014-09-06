@@ -5,7 +5,33 @@ Distributed under MIT license
 http://github.com/crashlytics/backbone.statemanager
 ###
 
-Backbone.StateManager = ((Backbone, _) ->
+((root, factory) ->
+  if typeof define is "function" and define.amd
+    define [
+      "underscore"
+      "backbone"
+      "jquery"
+    ], (_, Backbone, $) ->
+      factory _, Backbone, $
+
+  else if typeof exports isnt "undefined"
+    _ = require("underscore")
+    Backbone = require("backbone")
+    $ = require("jquery")
+    module.exports = factory(_, Backbone, $)
+  else
+    factory root._, root.Backbone, root.jQuery
+  return
+) this, (_, Backbone, $) ->
+  "use strict"
+  previousStateManager = Backbone.StateManager
+  StateManager = Backbone.StateManager = {}
+  StateManager.VERSION = "0.5.0"
+  StateManager.noConflict = ->
+    Backbone.StateManager = previousStateManager
+    @
+
+
 
   # Set our constructor - just a States object
   StateManager = (states, @options = {}) ->
@@ -147,5 +173,4 @@ Backbone.StateManager = ((Backbone, _) ->
         obj[key] = _deepBindAll(value, target)
     obj
 
-  StateManager
-)(Backbone, _)
+  Backbone.StateManager
