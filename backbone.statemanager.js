@@ -25,7 +25,7 @@ http://github.com/crashlytics/backbone.statemanager
     var previousStateManager;
     previousStateManager = Backbone.StateManager;
     Backbone.StateManager = (function(_, Backbone) {
-      var StateManager, addStateManager, _deepBindAll;
+      var StateManager, _deepBindAll;
       StateManager = function(states, options) {
         this.options = options != null ? options : {};
         this.states = new StateManager.States(states);
@@ -110,27 +110,6 @@ http://github.com/crashlytics/backbone.statemanager
           delete this.currentState;
           return this;
         }
-      }, addStateManager = function(target, options) {
-        var stateManager, states;
-        if (options == null) {
-          options = {};
-        }
-        if (!target) {
-          new Error('Target must be defined');
-        }
-        states = _.isFunction(target.states) ? target.states() : target.states;
-        _deepBindAll(states, target);
-        target.stateManager = stateManager = new Backbone.StateManager(states, options);
-        target.triggerState = function() {
-          return stateManager.triggerState.apply(stateManager, arguments);
-        };
-        target.getCurrentState = function() {
-          return stateManager.getCurrentState();
-        };
-        if (options.initialize || _.isUndefined(options.initialize)) {
-          stateManager.initialize(options);
-        }
-        return delete target.states;
       });
       StateManager.States = function(states) {
         this.states = {};
@@ -205,6 +184,28 @@ http://github.com/crashlytics/backbone.statemanager
       StateManager.State._regExpStateConversion = function(name) {
         name = name.replace(/[-[\]{}()+?.,\\^$|#\s]/g, '\\$&').replace(/:\w+/g, '([^\/]+)').replace(/\*\w+/g, '(.*?)');
         return new RegExp("^" + name + "$");
+      };
+      StateManager.addStateManager = function(target, options) {
+        var stateManager, states;
+        if (options == null) {
+          options = {};
+        }
+        if (!target) {
+          new Error('Target must be defined');
+        }
+        states = _.isFunction(target.states) ? target.states() : target.states;
+        _deepBindAll(states, target);
+        target.stateManager = stateManager = new Backbone.StateManager(states, options);
+        target.triggerState = function() {
+          return stateManager.triggerState.apply(stateManager, arguments);
+        };
+        target.getCurrentState = function() {
+          return stateManager.getCurrentState();
+        };
+        if (options.initialize || _.isUndefined(options.initialize)) {
+          stateManager.initialize(options);
+        }
+        return delete target.states;
       };
       _deepBindAll = function(obj) {
         var target;
