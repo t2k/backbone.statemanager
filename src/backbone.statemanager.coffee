@@ -174,4 +174,4 @@ http://github.com/crashlytics/backbone.statemanager
         obj[key] = _deepBindAll(value, target)
     obj
 
-  Backbone.StateManager
+  StateManager

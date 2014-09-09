@@ -223,7 +223,7 @@ http://github.com/crashlytics/backbone.statemanager
       });
       return obj;
     };
-    return Backbone.StateManager;
+    return StateManager;
   });
 
 }).call(this);
