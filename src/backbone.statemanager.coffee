@@ -97,6 +97,22 @@ http://github.com/crashlytics/backbone.statemanager
       @trigger 'exit:state', @currentState, state, options
       delete @currentState
       @
+    # Function we can use to provide StateManager capabilities to views on construct
+    addStateManager = (target, options = {}) ->
+      new Error 'Target must be defined' unless target
+      # Allow statest to be a method (helpful for prototype definitions that get mutated with _.bind)
+      states = if _.isFunction target.states then target.states() else target.states
+      _deepBindAll states, target
+      target.stateManager = stateManager = new Backbone.StateManager states, options
+      target.triggerState = -> stateManager.triggerState.apply stateManager, arguments
+      target.getCurrentState = -> stateManager.getCurrentState()
+
+      # Initialize the state manager, unless explictly told not to
+      stateManager.initialize options if options.initialize or _.isUndefined options.initialize
+
+      # Cleanup
+      delete target.states
+
 
   # Setup our states object
   StateManager.States = (states) ->
@@ -147,21 +163,6 @@ http://github.com/crashlytics/backbone.statemanager
                 .replace(/\*\w+/g, '(.*?)')
     new RegExp "^#{ name }$"
 
-  # Function we can use to provide StateManager capabilities to views on construct
-  StateManager.addStateManager = (target, options = {}) ->
-    new Error 'Target must be defined' unless target
-    # Allow statest to be a method (helpful for prototype definitions that get mutated with _.bind)
-    states = if _.isFunction target.states then target.states() else target.states
-    _deepBindAll states, target
-    target.stateManager = stateManager = new Backbone.StateManager states, options
-    target.triggerState = -> stateManager.triggerState.apply stateManager, arguments
-    target.getCurrentState = -> stateManager.getCurrentState()
-
-    # Initialize the state manager, unless explictly told not to
-    stateManager.initialize options if options.initialize or _.isUndefined options.initialize
-
-    # Cleanup
-    delete target.states
 
   # Recursively finds methods in an object and binds them to target
   _deepBindAll = (obj) ->
